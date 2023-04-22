@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace Nethermind.Crypto.SecP256k1;
+namespace Nethermind.Crypto;
 
 public static partial class SecP256k1
 {
