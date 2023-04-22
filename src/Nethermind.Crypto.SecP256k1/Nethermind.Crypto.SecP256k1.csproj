@@ -15,7 +15,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <PackageId>Nethermind.Crypto.SecP256k1</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>../README.md</PackageReadmeFile>
+    <PackageReadmeFile>../../README.md</PackageReadmeFile>
     <PackageProjectUrl>https://nethermind.io</PackageProjectUrl>
     <PackageTags>cryptography ecc secp256k1</PackageTags>
     <RepositoryType>git</RepositoryType>
