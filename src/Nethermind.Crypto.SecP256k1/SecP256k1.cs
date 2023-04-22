@@ -20,46 +20,38 @@ public static partial class SecP256k1
     }
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
-    [LibraryImport(LibraryName)]
-    public static partial IntPtr secp256k1_context_create(uint flags);
+    [DllImport(LibraryName)]
+    public static extern IntPtr secp256k1_context_create(uint flags);
 
-    [LibraryImport(LibraryName)]
-    public static partial IntPtr secp256k1_context_destroy(IntPtr context);
+    [DllImport(LibraryName)]
+    public static extern IntPtr secp256k1_context_destroy(IntPtr context);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ec_seckey_verify(IntPtr context, byte[] seckey);
+    [DllImport(LibraryName)]
+    public static extern bool secp256k1_ec_seckey_verify(IntPtr context, byte[] seckey);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ec_pubkey_create(IntPtr context, void* pubkey, byte[] seckey);
+    [DllImport(LibraryName)]
+    public static unsafe extern bool secp256k1_ec_pubkey_create(IntPtr context, void* pubkey, byte[] seckey);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref uint outputSize, void* publicKey, uint flags);
+    [DllImport(LibraryName)]
+    public static unsafe extern bool secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref uint outputSize, void* publicKey, uint flags);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ecdsa_sign_recoverable(IntPtr context, byte[] signature, byte[] messageHash, byte[] privateKey, IntPtr nonceFunction, IntPtr nonceData);
+    [DllImport(LibraryName)]
+    public static extern bool secp256k1_ecdsa_sign_recoverable(IntPtr context, byte[] signature, byte[] messageHash, byte[] privateKey, IntPtr nonceFunction, IntPtr nonceData);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ecdsa_recoverable_signature_serialize_compact(IntPtr context, byte[] compactSignature, out int recoveryId, byte[] signature);
+    [DllImport(LibraryName)]
+    public static extern bool secp256k1_ecdsa_recoverable_signature_serialize_compact(IntPtr context, byte[] compactSignature, out int recoveryId, byte[] signature);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, void* signature, void* compactSignature, int recoveryId);
+    [DllImport(LibraryName)]
+    public static unsafe extern bool secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, void* signature, void* compactSignature, int recoveryId);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ecdsa_recover(IntPtr context, void* publicKey, void* signature, byte[] message);
+    [DllImport(LibraryName)]
+    public static unsafe extern bool secp256k1_ecdsa_recover(IntPtr context, void* publicKey, void* signature, byte[] message);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ecdh(IntPtr context, byte[] output, byte[] publicKey, byte[] privateKey, IntPtr hashFunctionPointer, IntPtr data);
+    [DllImport(LibraryName)]
+    public static extern bool secp256k1_ecdh(IntPtr context, byte[] output, byte[] publicKey, byte[] privateKey, IntPtr hashFunctionPointer, IntPtr data);
 
-    [LibraryImport(LibraryName)]
-    public static unsafe partial int secp256k1_ec_pubkey_parse(IntPtr ctx, void* pubkey, void* input, uint inputlen);
+    [DllImport(LibraryName)]
+    public static unsafe extern int secp256k1_ec_pubkey_parse(IntPtr ctx, void* pubkey, void* input, uint inputlen);
 #pragma warning restore CA1401 // P/Invokes should not be visible
 
     /* constants from pycoin (https://github.com/richardkiss/pycoin)*/
