@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace Nethermind.Secp256k1;
+namespace Nethermind.Crypto.SecP256k1;
 
 public static partial class SecP256k1
 {
@@ -15,7 +15,7 @@ public static partial class SecP256k1
 
     static SecP256k1()
     {
-        NativeLibrary.SetDllImportResolver(typeof(SecP256k1).Assembly, LoadLibrary);
+        NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), LoadLibrary);
         Context = CreateContext();
     }
 
