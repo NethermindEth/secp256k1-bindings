@@ -5,7 +5,7 @@
 
 C# bindings for the Bitcoin Core [libsecp256k1](https://github.com/bitcoin-core/secp256k1) library.
 
-### Note
+### Build
 
 Files in the `src/Nethermind.Crypto.SecP256k1/runtimes` directory are empty.
 Before building the project, these files should be replaced with the respective libsecp256k1 binaries.

@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2023 Demerzel Solutions Limited
+// SPDX-FileCopyrightText: 2023 Demerzel Solutions Limited
 // SPDX-License-Identifier: MIT
 
 using System;
@@ -7,59 +7,51 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace Nethermind.Secp256k1;
+namespace Nethermind.Crypto;
 
-public static partial class SecP256k1
+public static class SecP256k1
 {
     private const string LibraryName = "secp256k1";
 
     static SecP256k1()
     {
-        NativeLibrary.SetDllImportResolver(typeof(SecP256k1).Assembly, LoadLibrary);
+        NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), LoadLibrary);
         Context = CreateContext();
     }
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
-    [LibraryImport(LibraryName)]
-    public static partial IntPtr secp256k1_context_create(uint flags);
+    [DllImport(LibraryName)]
+    public static extern IntPtr secp256k1_context_create(uint flags);
 
-    [LibraryImport(LibraryName)]
-    public static partial IntPtr secp256k1_context_destroy(IntPtr context);
+    [DllImport(LibraryName)]
+    public static extern IntPtr secp256k1_context_destroy(IntPtr context);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ec_seckey_verify(IntPtr context, byte[] seckey);
+    [DllImport(LibraryName)]
+    public static extern int secp256k1_ec_seckey_verify(IntPtr context, byte[] seckey);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ec_pubkey_create(IntPtr context, void* pubkey, byte[] seckey);
+    [DllImport(LibraryName)]
+    public static unsafe extern int secp256k1_ec_pubkey_create(IntPtr context, void* pubkey, byte[] seckey);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref uint outputSize, void* publicKey, uint flags);
+    [DllImport(LibraryName)]
+    public static unsafe extern  int secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref uint outputSize, void* publicKey, uint flags);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ecdsa_sign_recoverable(IntPtr context, byte[] signature, byte[] messageHash, byte[] privateKey, IntPtr nonceFunction, IntPtr nonceData);
+    [DllImport(LibraryName)]
+    public static extern int secp256k1_ecdsa_sign_recoverable(IntPtr context, byte[] signature, byte[] messageHash, byte[] privateKey, IntPtr nonceFunction, IntPtr nonceData);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ecdsa_recoverable_signature_serialize_compact(IntPtr context, byte[] compactSignature, out int recoveryId, byte[] signature);
+    [DllImport(LibraryName)]
+    public static extern int secp256k1_ecdsa_recoverable_signature_serialize_compact(IntPtr context, byte[] compactSignature, out int recoveryId, byte[] signature);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, void* signature, void* compactSignature, int recoveryId);
+    [DllImport(LibraryName)]
+    public static unsafe extern int secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, void* signature, void* compactSignature, int recoveryId);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool secp256k1_ecdsa_recover(IntPtr context, void* publicKey, void* signature, byte[] message);
+    [DllImport(LibraryName)]
+    public static unsafe extern int secp256k1_ecdsa_recover(IntPtr context, void* publicKey, void* signature, byte[] message);
 
-    [LibraryImport(LibraryName)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool secp256k1_ecdh(IntPtr context, byte[] output, byte[] publicKey, byte[] privateKey, IntPtr hashFunctionPointer, IntPtr data);
+    [DllImport(LibraryName)]
+    public static extern int secp256k1_ecdh(IntPtr context, byte[] output, byte[] publicKey, byte[] privateKey, IntPtr hashFunctionPointer, IntPtr data);
 
-    [LibraryImport(LibraryName)]
-    public static unsafe partial int secp256k1_ec_pubkey_parse(IntPtr ctx, void* pubkey, void* input, uint inputlen);
+    [DllImport(LibraryName)]
+    public static unsafe extern int secp256k1_ec_pubkey_parse(IntPtr ctx, void* pubkey, void* input, uint inputlen);
 #pragma warning restore CA1401 // P/Invokes should not be visible
 
     /* constants from pycoin (https://github.com/richardkiss/pycoin)*/
@@ -93,7 +85,7 @@ public static partial class SecP256k1
 
     public static bool VerifyPrivateKey(byte[] privateKey)
     {
-        return secp256k1_ec_seckey_verify(Context, privateKey);
+        return secp256k1_ec_seckey_verify(Context, privateKey) == 1;
     }
 
     public static unsafe byte[]? GetPublicKey(byte[] privateKey, bool compressed)
@@ -103,7 +95,7 @@ public static partial class SecP256k1
 
         fixed (byte* serializedPtr = &MemoryMarshal.GetReference(serializedPublicKey), pubKeyPtr = &MemoryMarshal.GetReference(publicKey))
         {
-            bool keyDerivationFailed = !secp256k1_ec_pubkey_create(Context, pubKeyPtr, privateKey);
+            bool keyDerivationFailed = secp256k1_ec_pubkey_create(Context, pubKeyPtr, privateKey) == 0;
 
             if (keyDerivationFailed)
             {
@@ -113,7 +105,7 @@ public static partial class SecP256k1
             uint outputSize = (uint)serializedPublicKey.Length;
             uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
 
-            bool serializationFailed = !secp256k1_ec_pubkey_serialize(Context, serializedPtr, ref outputSize, pubKeyPtr, flags);
+            bool serializationFailed = secp256k1_ec_pubkey_serialize(Context, serializedPtr, ref outputSize, pubKeyPtr, flags) == 0;
 
             if (serializationFailed)
             {
@@ -129,16 +121,16 @@ public static partial class SecP256k1
         byte[] recoverableSignature = new byte[65];
         recoveryId = 0;
 
-        if (!secp256k1_ecdsa_sign_recoverable(
-            Context, recoverableSignature, messageHash, privateKey, IntPtr.Zero, IntPtr.Zero))
+        if (secp256k1_ecdsa_sign_recoverable(
+            Context, recoverableSignature, messageHash, privateKey, IntPtr.Zero, IntPtr.Zero) == 0)
         {
             return null;
         }
 
         byte[] compactSignature = new byte[64];
 
-        if (!secp256k1_ecdsa_recoverable_signature_serialize_compact(
-            Context, compactSignature, out recoveryId, recoverableSignature))
+        if (secp256k1_ecdsa_recoverable_signature_serialize_compact(
+            Context, compactSignature, out recoveryId, recoverableSignature) == 0)
         {
             return null;
         }
@@ -194,13 +186,13 @@ public static partial class SecP256k1
             recoverableSignaturePtr = &MemoryMarshal.GetReference(recoverableSignature),
             serializedPublicKeyPtr = &MemoryMarshal.GetReference(output))
         {
-            if (!secp256k1_ecdsa_recoverable_signature_parse_compact(
-                Context, recoverableSignaturePtr, compactSigPtr, recoveryId))
+            if (secp256k1_ecdsa_recoverable_signature_parse_compact(
+                Context, recoverableSignaturePtr, compactSigPtr, recoveryId) == 0)
             {
                 return false;
             }
 
-            if (!secp256k1_ecdsa_recover(Context, pubKeyPtr, recoverableSignaturePtr, messageHash))
+            if (secp256k1_ecdsa_recover(Context, pubKeyPtr, recoverableSignaturePtr, messageHash) == 0)
             {
                 return false;
             }
@@ -208,8 +200,8 @@ public static partial class SecP256k1
             uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
             uint outputSize = (uint)output.Length;
 
-            if (!secp256k1_ec_pubkey_serialize(
-                Context, serializedPublicKeyPtr, ref outputSize, pubKeyPtr, flags))
+            if (secp256k1_ec_pubkey_serialize(
+                Context, serializedPublicKeyPtr, ref outputSize, pubKeyPtr, flags) == 0)
             {
                 return false;
             }
@@ -243,7 +235,7 @@ public static partial class SecP256k1
         {
             IntPtr fp = Marshal.GetFunctionPointerForDelegate(hashFunctionPtr);
             {
-                return secp256k1_ecdh(Context, agreement, publicKey, privateKey, fp, IntPtr.Zero);
+                return secp256k1_ecdh(Context, agreement, publicKey, privateKey, fp, IntPtr.Zero) == 1;
             }
         }
         finally
@@ -335,7 +327,7 @@ public static partial class SecP256k1
         fixed (byte* serializedPtr = &MemoryMarshal.GetReference(serializedPublicKeyOutput), pubKeyPtr = &MemoryMarshal.GetReference(publicKey))
         {
             bool success = secp256k1_ec_pubkey_serialize(
-                Context, serializedPtr, ref newLength, pubKeyPtr, flags);
+                Context, serializedPtr, ref newLength, pubKeyPtr, flags) == 1;
 
             return success && newLength == serializedPubKeyLength;
         }
