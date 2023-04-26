@@ -7,7 +7,7 @@ on:
     inputs:
       ref:
         default: master
-        description: Version tag
+        description: libsecp256k1 version
         required: false
       publish:
         default: false
@@ -17,7 +17,6 @@ on:
 
 env:
   RETENTION: 2  
-  SOURCE_KEY: secp256k1-${{ github.run_id }}
 
 jobs:
   build-linux:
@@ -47,7 +46,7 @@ jobs:
             ${{ matrix.arch == 'arm64' && '-D CMAKE_TOOLCHAIN_FILE=./cmake/arm-linux-gnueabihf.toolchain.cmake -D SECP256K1_ASM=arm -D SECP256K1_EXPERIMENTAL=ON' || '' }}
           cmake --build build --config Release
 
-      - name: Upload Linux ${{ matrix.arch }} artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: linux-${{ matrix.arch }}
@@ -80,7 +79,7 @@ jobs:
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build --config Release
 
-      - name: Upload macOS ${{ env.ARCH }} artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: osx-${{ env.ARCH }}
@@ -107,7 +106,7 @@ jobs:
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build --config Release
-      - name: Upload Windows x64 artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: win-x64
