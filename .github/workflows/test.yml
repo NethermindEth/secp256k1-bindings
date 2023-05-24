@@ -43,7 +43,7 @@ jobs:
           rm -rf build
           cmake -S . -B build \
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON \
-            ${{ matrix.arch == 'arm64' && '-D CMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc- -D CMAKE_SYSTEM_NAME=Linux -D CMAKE_SYSTEM_PROCESSOR=aarch64' || '' }}
+            ${{ matrix.arch == 'arm64' && '-D CMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc-11 -D CMAKE_SYSTEM_NAME=Linux -D CMAKE_SYSTEM_PROCESSOR=aarch64' || '' }}
           cmake --build build --config Release
 
       - name: Upload artifact
