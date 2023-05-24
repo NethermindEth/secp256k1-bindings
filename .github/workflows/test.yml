@@ -105,11 +105,10 @@ jobs:
         shell: pwsh
         run: |
           if (Test-Path build) { rd -Recurse build }
-          cmake -E env CFLAGS="/WX"
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-            -D CMAKE_BUILD_TYPE=Release `
+            -D CMAKE_CFLAGS=/WX `
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
-          cmake --build build --config Release -property:UseMultiToolTask=true;CL_MPcount=5
+          cmake --build build --config Release
           Get-ChildItem build/src/Release
           Get-ChildItem build/src/RelWithDebInfo
       - name: Upload artifact
