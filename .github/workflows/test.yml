@@ -156,7 +156,7 @@ jobs:
       #  run: dotnet test -c ${{ env.BUILD_CONFIG }} --no-restore
 
       - name: Publish
-        if: ${{ inputs.publish }}
+        #if: ${{ inputs.publish }}
         working-directory: src/Nethermind.Crypto.SecP256k1
         run: |
           dotnet pack -c ${{ env.BUILD_CONFIG }} --no-build
