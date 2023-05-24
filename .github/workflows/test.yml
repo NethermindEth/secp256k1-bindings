@@ -35,7 +35,7 @@ jobs:
 
       - name: Set up GNU C compiler for armhf
         if: matrix.arch == 'arm64'
-        run: sudo apt-get install gcc-arm-linux-gnueabihf -y
+        run: sudo apt-get install gcc-aarch64-linux-gnu -y
 
       - name: Build
         working-directory: secp256k1
@@ -43,7 +43,7 @@ jobs:
           rm -rf build
           cmake -S . -B build \
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON \
-            ${{ matrix.arch == 'arm64' && '-D CMAKE_TOOLCHAIN_FILE=./cmake/arm-linux-gnueabihf.toolchain.cmake -D SECP256K1_ASM=arm -D SECP256K1_EXPERIMENTAL=ON' || '' }}
+            ${{ matrix.arch == 'arm64' && '-D CMAKE_SYSTEM_NAME=Linux -D CMAKE_SYSTEM_PROCESSOR=aarch64 -D CMAKE_C_COMPILER=gcc-aarch64-linux-gnu Linux -D SECP256K1_ASM=arm -D SECP256K1_EXPERIMENTAL=ON' || '' }}
           cmake --build build --config Release
 
       - name: Upload artifact
@@ -54,30 +54,30 @@ jobs:
           retention-days: ${{ env.RETENTION }}
           if-no-files-found: error
 
-  build-macos:
-    name: macOS build
-    strategy:
-      matrix:
-        arch: [arm64, x86_64]
-    runs-on: macos-latest
-    env:
-      ARCH: ${{ matrix.arch == 'arm64' && 'arm64' || 'x64' }}
-    steps:
-      - name: Check out secp256k1 repository
-        uses: actions/checkout@v3
-        with:
-          repository: bitcoin-core/secp256k1
-          ref: ${{ github.event.inputs.ref }}
-          path: secp256k1
+  #build-macos:
+  #  name: macOS build
+  #  strategy:
+  #    matrix:
+  #      arch: [arm64, x86_64]
+  #  runs-on: macos-latest
+  #  env:
+  #    ARCH: ${{ matrix.arch == 'arm64' && 'arm64' || 'x64' }}
+  #  steps:
+  #    - name: Check out secp256k1 repository
+  #      uses: actions/checkout@v3
+  #      with:
+  #        repository: bitcoin-core/secp256k1
+  #        ref: ${{ github.event.inputs.ref }}
+  #        path: secp256k1
 
-      - name: Build
-        working-directory: secp256k1
-        run: |
-          rm -rf build
-          cmake -S . -B build \
-            -D CMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
-            -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
-          cmake --build build --config Release
+  #    - name: Build
+  #      working-directory: secp256k1
+  #      run: |
+  #        rm -rf build
+  #        cmake -S . -B build \
+  #          -D CMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
+  #          -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
+  #        cmake --build build --config Release
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -87,36 +87,36 @@ jobs:
           retention-days: ${{ env.RETENTION }}
           if-no-files-found: error
 
-  build-windows:
-    name: Windows build
-    runs-on: windows-latest
-    steps:
-      - name: Check out secp256k1 repository
-        uses: actions/checkout@v3
-        with:
-          repository: bitcoin-core/secp256k1
-          ref: ${{ github.event.inputs.ref }}
-          path: secp256k1
+  #build-windows:
+  #  name: Windows build
+  #  runs-on: windows-latest
+  #  steps:
+  #    - name: Check out secp256k1 repository
+  #      uses: actions/checkout@v3
+  #      with:
+  #        repository: bitcoin-core/secp256k1
+  #        ref: ${{ github.event.inputs.ref }}
+  #        path: secp256k1
 
-      - name: Build
-        working-directory: secp256k1
-        shell: pwsh
-        run: |
-          if (Test-Path build) { rd -Recurse build }
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-            -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
-          cmake --build build --config Release
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: win-x64
-          path: secp256k1/build/src/Release/secp256k1.dll
-          retention-days: ${{ env.RETENTION }}
-          if-no-files-found: error
+  #    - name: Build
+  #      working-directory: secp256k1
+  #      shell: pwsh
+  #      run: |
+  #        if (Test-Path build) { rd -Recurse build }
+  #        cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+  #          -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
+  #        cmake --build build --config Release
+  #    - name: Upload artifact
+  #      uses: actions/upload-artifact@v3
+  #      with:
+  #        name: win-x64
+  #        path: secp256k1/build/src/Release/secp256k1.dll
+  #        retention-days: ${{ env.RETENTION }}
+  #        if-no-files-found: error
 
   test:
     name: Test
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux]
     env:
       BUILD_CONFIG: release
     runs-on: ubuntu-latest
@@ -133,10 +133,10 @@ jobs:
         working-directory: src/Nethermind.Crypto.SecP256k1/runtimes
         run: |
           mv -f linux-arm64/libsecp256k1.so linux-arm64/native/libsecp256k1.so
-          mv -f linux-x64/libsecp256k1.so linux-x64/native/libsecp256k1.so
-          mv -f osx-arm64/libsecp256k1.dylib osx-arm64/native/libsecp256k1.dylib
-          mv -f osx-x64/libsecp256k1.dylib osx-x64/native/libsecp256k1.dylib
-          mv -f win-x64/secp256k1.dll win-x64/native/secp256k1.dll
+          #mv -f linux-x64/libsecp256k1.so linux-x64/native/libsecp256k1.so
+          #mv -f osx-arm64/libsecp256k1.dylib osx-arm64/native/libsecp256k1.dylib
+          #mv -f osx-x64/libsecp256k1.dylib osx-x64/native/libsecp256k1.dylib
+          #mv -f win-x64/secp256k1.dll win-x64/native/secp256k1.dll
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
@@ -156,8 +156,8 @@ jobs:
         run: dotnet test -c ${{ env.BUILD_CONFIG }} --no-restore
 
       - name: Publish
-        if: ${{ inputs.publish }}
+        #if: ${{ inputs.publish }}
         working-directory: src/Nethermind.Crypto.SecP256k1
         run: |
           dotnet pack -c ${{ env.BUILD_CONFIG }} --no-build
-          dotnet nuget push bin/${{ env.BUILD_CONFIG }}/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+          dotnet nuget push bin/${{ env.BUILD_CONFIG }}/*.nupkg -k ${{ secrets.NUGETTEST_API_KEY }} -s https://apiint.nugettest.org/v3/index.json
