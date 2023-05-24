@@ -106,7 +106,7 @@ jobs:
         run: |
           if (Test-Path build) { rd -Recurse build }
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-            -D CMAKE_CFLAGS=/WX `
+            -D CMAKE_C_FLAGS=/WX `
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build --config Release
           Get-ChildItem build/src/Release
