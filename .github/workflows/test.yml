@@ -118,50 +118,50 @@ jobs:
           retention-days: ${{ env.RETENTION }}
           if-no-files-found: error
 
-  test:
-    name: Test
-    needs: [build-linux]
-    env:
-      BUILD_CONFIG: release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out secp256k1-bindings repository
-        uses: actions/checkout@v3
+  #test:
+  #  name: Test
+  #  needs: [build-linux]
+  #  env:
+  #    BUILD_CONFIG: release
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Check out secp256k1-bindings repository
+  #      uses: actions/checkout@v3
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: src/Nethermind.Crypto.SecP256k1/runtimes
+  #    - name: Download artifacts
+  #      uses: actions/download-artifact@v3
+  #      with:
+  #        path: src/Nethermind.Crypto.SecP256k1/runtimes
 
-      - name: Move artifacts
-        working-directory: src/Nethermind.Crypto.SecP256k1/runtimes
-        run: |
-          mv -f linux-arm64/libsecp256k1.so linux-arm64/native/libsecp256k1.so
-          #mv -f linux-x64/libsecp256k1.so linux-x64/native/libsecp256k1.so
-          #mv -f osx-arm64/libsecp256k1.dylib osx-arm64/native/libsecp256k1.dylib
-          #mv -f osx-x64/libsecp256k1.dylib osx-x64/native/libsecp256k1.dylib
-          #mv -f win-x64/secp256k1.dll win-x64/native/secp256k1.dll
+  #    - name: Move artifacts
+  #      working-directory: src/Nethermind.Crypto.SecP256k1/runtimes
+  #      run: |
+  #        mv -f linux-arm64/libsecp256k1.so linux-arm64/native/libsecp256k1.so
+  #        #mv -f linux-x64/libsecp256k1.so linux-x64/native/libsecp256k1.so
+  #        #mv -f osx-arm64/libsecp256k1.dylib osx-arm64/native/libsecp256k1.dylib
+  #        #mv -f osx-x64/libsecp256k1.dylib osx-x64/native/libsecp256k1.dylib
+  #        #mv -f win-x64/secp256k1.dll win-x64/native/secp256k1.dll
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7
+  #    - name: Set up .NET
+  #      uses: actions/setup-dotnet@v3
+  #      with:
+  #        dotnet-version: 7
 
-      - name: Install dependencies
-        working-directory: src
-        run: dotnet restore
+  #    - name: Install dependencies
+  #      working-directory: src
+  #      run: dotnet restore
 
-      - name: Build
-        working-directory: src/Nethermind.Crypto.SecP256k1
-        run: dotnet build -c ${{ env.BUILD_CONFIG }} --no-restore -p:ContinuousIntegrationBuild=true
+  #    - name: Build
+  #      working-directory: src/Nethermind.Crypto.SecP256k1
+  #      run: dotnet build -c ${{ env.BUILD_CONFIG }} --no-restore -p:ContinuousIntegrationBuild=true
     
-      #- name: Test
-      #  working-directory: src/Nethermind.Crypto.SecP256k1.Test
-      #  run: dotnet test -c ${{ env.BUILD_CONFIG }} --no-restore
+  #    #- name: Test
+  #    #  working-directory: src/Nethermind.Crypto.SecP256k1.Test
+  #    #  run: dotnet test -c ${{ env.BUILD_CONFIG }} --no-restore
 
-      - name: Publish
-        if: ${{ inputs.publish }}
-        working-directory: src/Nethermind.Crypto.SecP256k1
-        run: |
-          dotnet pack -c ${{ env.BUILD_CONFIG }} --no-build
-          dotnet nuget push bin/${{ env.BUILD_CONFIG }}/*.nupkg -k ${{ secrets.NUGETTEST_API_KEY }} -s https://apiint.nugettest.org/v3/index.json
+  #    - name: Publish
+  #      if: ${{ inputs.publish }}
+  #      working-directory: src/Nethermind.Crypto.SecP256k1
+  #      run: |
+  #        dotnet pack -c ${{ env.BUILD_CONFIG }} --no-build
+  #        dotnet nuget push bin/${{ env.BUILD_CONFIG }}/*.nupkg -k ${{ secrets.NUGETTEST_API_KEY }} -s https://apiint.nugettest.org/v3/index.json
