@@ -109,8 +109,8 @@ jobs:
             -D CMAKE_C_FLAGS=/WX `
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build --config Release
-          Get-ChildItem build/src/Release
-          Get-ChildItem build/src/RelWithDebInfo
+          ls build/src/Release/*.dll | rni -NewName secp256k1.dll
+          ls build/src/Release
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
