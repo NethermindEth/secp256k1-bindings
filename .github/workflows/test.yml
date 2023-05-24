@@ -35,7 +35,7 @@ jobs:
 
       - name: Set up GNU C compiler for armhf
         if: matrix.arch == 'arm64'
-        run: sudo apt-get install gcc-aarch64-linux-gnu -y
+        run: sudo apt-get update && sudo apt-get install gcc-aarch64-linux-gnu -y
 
       - name: Build
         working-directory: secp256k1
