@@ -1,4 +1,4 @@
-﻿// SPDX-FileCopyrightText: 2023 Demerzel Solutions Limited
+// SPDX-FileCopyrightText: 2023 Demerzel Solutions Limited
 // SPDX-License-Identifier: MIT
 
 using System;
@@ -15,7 +15,7 @@ public class SecP256k1Tests
     {
         byte[] privateKey = new byte[32];
         bool result = SecP256k1.VerifyPrivateKey(privateKey);
-        Assert.False(result);
+        Assert.That(result, Is.False);
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public class SecP256k1Tests
         byte[] privateKey = new byte[32];
         privateKey[0] = 1;
         bool result = SecP256k1.VerifyPrivateKey(privateKey);
-        Assert.True(result);
+        Assert.That(result);
     }
 
     [Test]
@@ -38,7 +38,7 @@ public class SecP256k1Tests
         byte[] privateKey = new byte[32];
         privateKey[0] = 1;
         byte[]? publicKey = SecP256k1.GetPublicKey(privateKey, true);
-        Assert.AreEqual(33, publicKey!.Length);
+        Assert.That(publicKey!, Has.Length.EqualTo(33));
     }
 
     [Test]
@@ -47,7 +47,7 @@ public class SecP256k1Tests
         byte[] privateKey = new byte[32];
         privateKey[0] = 1;
         byte[]? publicKey = SecP256k1.GetPublicKey(privateKey, false);
-        Assert.AreEqual(65, publicKey!.Length);
+        Assert.That(publicKey!, Has.Length.EqualTo(65));
     }
 
     [Test]
@@ -58,8 +58,11 @@ public class SecP256k1Tests
         byte[] messageHash = new byte[32];
         messageHash[0] = 1;
         byte[]? signature = SecP256k1.SignCompact(messageHash, privateKey, out int recoveryId);
-        Assert.AreEqual(64, signature!.Length);
-        Assert.AreEqual(1, recoveryId);
+        Assert.Multiple(() =>
+        {
+            Assert.That(signature!, Has.Length.EqualTo(64));
+            Assert.That(recoveryId, Is.EqualTo(1));
+        });
     }
 
     [Test]
@@ -95,7 +98,7 @@ public class SecP256k1Tests
         byte[] publicKey = Convert.FromHexString(publicKeyStr);
         byte[] privateKey = Convert.FromHexString(privateKeyStr);
         SecP256k1.Ecdh(result, publicKey, privateKey);
-        Assert.AreEqual(expectedSecretStr, Convert.ToHexString(result).ToLowerInvariant());
+        Assert.That(Convert.ToHexString(result).ToLowerInvariant(), Is.EqualTo(expectedSecretStr));
     }
 
     [TestCase("103aaccf80ad53c11ce2d1654e733a70835b852bfa4528a6214f11a9b9c6e55c", "7d2386471f6caf4327e08fe8767d5b3e3ae014a32ec2f1bd4f7ca3dcac7c00448f613f0ae0c2b340a06a2183586d4b36c0b33a19dba3cad5e9dd81278e1e5a9b", "d0ab6bbdc1e1bc5c189d843a0ed4ae18bb76b1afbe4c2b6ffed66992402f8f90")]
@@ -105,7 +108,7 @@ public class SecP256k1Tests
         byte[] publicKey = Convert.FromHexString(publicKeyStr);
         byte[] privateKey = Convert.FromHexString(privateKeyStr);
         byte[] result = SecP256k1.EcdhSerialized(publicKey, privateKey);
-        Assert.AreEqual(expectedSecretStr, Convert.ToHexString(result).ToLowerInvariant());
+        Assert.That(Convert.ToHexString(result).ToLowerInvariant(), Is.EqualTo(expectedSecretStr));
     }
 
     [Test]
@@ -118,6 +121,6 @@ public class SecP256k1Tests
         byte[]? signature = SecP256k1.SignCompact(messageHash, privateKey, out int recoveryId);
         byte[] recovered = new byte[65];
         SecP256k1.RecoverKeyFromCompact(recovered, messageHash, signature, recoveryId, false);
-        Assert.AreEqual(65, recovered.Length);
+        Assert.That(recovered, Has.Length.EqualTo(65));
     }
 }

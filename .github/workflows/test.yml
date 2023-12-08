@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out secp256k1 repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: bitcoin-core/secp256k1
           ref: ${{ github.event.inputs.ref }}
@@ -65,7 +65,7 @@ jobs:
       ARCH: ${{ matrix.arch == 'arm64' && 'arm64' || 'x64' }}
     steps:
       - name: Check out secp256k1 repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: bitcoin-core/secp256k1
           ref: ${{ github.event.inputs.ref }}
@@ -94,7 +94,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out secp256k1 repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: bitcoin-core/secp256k1
           ref: ${{ github.event.inputs.ref }}
@@ -125,7 +125,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out secp256k1-bindings repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -143,8 +143,6 @@ jobs:
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7
 
       - name: Install dependencies
         working-directory: src
@@ -152,7 +150,7 @@ jobs:
 
       - name: Build
         working-directory: src/Nethermind.Crypto.SecP256k1
-        run: dotnet build -c ${{ env.BUILD_CONFIG }} --no-restore -p:ContinuousIntegrationBuild=true
+        run: dotnet build -c ${{ env.BUILD_CONFIG }} --no-restore
     
       - name: Test
         working-directory: src/Nethermind.Crypto.SecP256k1.Test
