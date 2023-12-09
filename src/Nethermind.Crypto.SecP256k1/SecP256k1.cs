@@ -33,7 +33,7 @@ public static class SecP256k1
     public static unsafe extern int secp256k1_ec_pubkey_create(IntPtr context, void* pubkey, byte[] seckey);
 
     [DllImport(LibraryName)]
-    public static unsafe extern  int secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref uint outputSize, void* publicKey, uint flags);
+    public static unsafe extern int secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref uint outputSize, void* publicKey, uint flags);
 
     [DllImport(LibraryName)]
     public static extern int secp256k1_ecdsa_sign_recoverable(IntPtr context, byte[] signature, byte[] messageHash, byte[] privateKey, IntPtr nonceFunction, IntPtr nonceData);
