@@ -45,7 +45,7 @@ jobs:
           cmake -S . -B build \
             -D CMAKE_BUILD_TYPE=Release \
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON \
-            ${{ matrix.arch == 'arm64' && '-D CMAKE_C_COMPILER=aarch64-linux-gnu-gcc-12 -D CMAKE_SYSTEM_NAME=Linux -D CMAKE_SYSTEM_PROCESSOR=aarch64 -D SECP256K1_ASM=AUTO' || '-D SECP256K1_ASM=x86_64' }}
+            ${{ matrix.arch == 'arm64' && '-D CMAKE_C_COMPILER=aarch64-linux-gnu-gcc-12 -D CMAKE_SYSTEM_NAME=Linux -D CMAKE_SYSTEM_PROCESSOR=aarch64' || '' }}
           cmake --build build
 
       - name: Upload artifact
@@ -79,7 +79,6 @@ jobs:
           cmake -S . -B build \
             -D CMAKE_BUILD_TYPE=Release \
             -D CMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
-            -D SECP256K1_ASM=${{ matrix.arch == 'arm64' && 'AUTO' || 'x86_64' }} \
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build
 
@@ -108,7 +107,6 @@ jobs:
         run: |
           if (Test-Path build) { rd -Recurse build }
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-            -D SECP256K1_ASM=AUTO `
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build --config Release
           ls build/src/Release/*.dll | rni -NewName secp256k1.dll
