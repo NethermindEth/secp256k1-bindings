@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -13,10 +14,22 @@ public static class SecP256k1
 {
     private const string LibraryName = "secp256k1";
 
-    static SecP256k1()
+    static unsafe SecP256k1()
     {
         NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), LoadLibrary);
+
         Context = CreateContext();
+
+        Span<byte> seed = stackalloc byte[32];
+
+        RandomNumberGenerator.Fill(seed);
+
+        fixed (byte* ptr = seed)
+        {
+            var result = secp256k1_context_randomize(Context, ptr);
+
+            Debug.Assert(result == 1, "Context randomization failed");
+        }
     }
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
@@ -52,6 +65,9 @@ public static class SecP256k1
 
     [DllImport(LibraryName)]
     public static unsafe extern int secp256k1_ec_pubkey_parse(IntPtr ctx, void* pubkey, void* input, uint inputlen);
+
+    [DllImport(LibraryName)]
+    public static unsafe extern int secp256k1_context_randomize(nint ctx, void* seed32);
 #pragma warning restore CA1401 // P/Invokes should not be visible
 
     /* constants from pycoin (https://github.com/richardkiss/pycoin)*/
