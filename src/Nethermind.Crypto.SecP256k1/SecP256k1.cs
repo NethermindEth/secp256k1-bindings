@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using System.Security.Cryptography;
 
 namespace Nethermind.Crypto;
@@ -13,10 +14,11 @@ namespace Nethermind.Crypto;
 public static class SecP256k1
 {
     private const string LibraryName = "secp256k1";
+    private static string? _libraryFallbackPath;
 
     static unsafe SecP256k1()
     {
-        NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), LoadLibrary);
+        AssemblyLoadContext.Default.ResolvingUnmanagedDll += OnResolvingUnmanagedDll;
 
         Context = CreateContext();
 
@@ -372,34 +374,35 @@ public static class SecP256k1
         }
     }
 
-    private static nint LoadLibrary(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+    private static nint OnResolvingUnmanagedDll(Assembly context, string name)
     {
-        string platform;
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        if (_libraryFallbackPath is null)
         {
-            libraryName = $"lib{libraryName}.so";
-            platform = "linux";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            libraryName = $"{libraryName}.dll";
-            platform = "win";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            libraryName = $"lib{libraryName}.dylib";
-            platform = "osx";
-        }
-        else
-            throw new PlatformNotSupportedException();
+            string platform;
 
-        if (NativeLibrary.TryLoad(libraryName, assembly, searchPath, out var handle))
-            return handle;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                name = $"lib{name}.so";
+                platform = "linux";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                name = $"lib{name}.dylib";
+                platform = "osx";
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                name = $"{name}.dll";
+                platform = "win";
+            }
+            else
+                throw new PlatformNotSupportedException();
 
-        var arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+            var arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
-        return NativeLibrary.Load(
-            Path.Combine("runtimes", $"{platform}-{arch}", "native", libraryName), assembly, searchPath);
+            _libraryFallbackPath = Path.Combine("runtimes", $"{platform}-{arch}", "native", name);
+        }
+
+        return NativeLibrary.Load(_libraryFallbackPath, context, default);
     }
 }
