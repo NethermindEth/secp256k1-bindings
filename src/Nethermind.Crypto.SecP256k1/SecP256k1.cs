@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
@@ -14,11 +13,10 @@ namespace Nethermind.Crypto;
 public static class SecP256k1
 {
     private const string LibraryName = "secp256k1";
-    private static string? _libraryFallbackPath;
 
     static unsafe SecP256k1()
     {
-        AssemblyLoadContext.Default.ResolvingUnmanagedDll += OnResolvingUnmanagedDll;
+        SetLibraryFallbackResolver();
 
         Context = CreateContext();
 
@@ -374,10 +372,15 @@ public static class SecP256k1
         }
     }
 
-    private static nint OnResolvingUnmanagedDll(Assembly context, string name)
+    private static void SetLibraryFallbackResolver()
     {
-        if (_libraryFallbackPath is null)
+        var assembly = typeof(SecP256k1).Assembly;
+
+        AssemblyLoadContext.GetLoadContext(assembly)!.ResolvingUnmanagedDll += (Assembly context, string name) =>
         {
+            if (context != assembly || !LibraryName.Equals(name, StringComparison.Ordinal))
+                return nint.Zero;
+
             string platform;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -400,9 +403,7 @@ public static class SecP256k1
 
             var arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
-            _libraryFallbackPath = Path.Combine("runtimes", $"{platform}-{arch}", "native", name);
-        }
-
-        return NativeLibrary.Load(_libraryFallbackPath, context, default);
+            return NativeLibrary.Load($"runtimes/{platform}-{arch}/native/{name}", context, DllImportSearchPath.AssemblyDirectory);
+        };
     }
 }
