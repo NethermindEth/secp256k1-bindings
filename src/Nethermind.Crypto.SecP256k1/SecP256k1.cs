@@ -95,7 +95,7 @@ public static class SecP256k1
         return secp256k1_context_create(Secp256K1ContextSign | Secp256K1ContextVerify);
     }
 
-    public static bool VerifyPrivateKey(byte[] privateKey)
+    public static bool VerifyPrivateKey(ReadOnlySpan<byte> privateKey)
     {
         return secp256k1_ec_seckey_verify(Context, privateKey) == 1;
     }
