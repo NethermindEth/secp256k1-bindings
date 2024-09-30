@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 
 namespace Nethermind.Crypto;
 
-public static class SecP256k1
+public static partial class SecP256k1
 {
     private const string LibraryName = "secp256k1";
 
@@ -29,41 +29,41 @@ public static class SecP256k1
     }
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
-    [DllImport(LibraryName)]
-    public static extern IntPtr secp256k1_context_create(uint flags);
+    [LibraryImport(LibraryName)]
+    public static partial IntPtr secp256k1_context_create(uint flags);
 
-    [DllImport(LibraryName)]
-    public static extern IntPtr secp256k1_context_destroy(IntPtr context);
+    [LibraryImport(LibraryName)]
+    public static partial IntPtr secp256k1_context_destroy(IntPtr context);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ec_seckey_verify(IntPtr context, ReadOnlySpan<byte> seckey);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ec_seckey_verify(IntPtr context, ReadOnlySpan<byte> seckey);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ec_pubkey_create(IntPtr context, Span<byte> pubkey, ReadOnlySpan<byte> seckey);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ec_pubkey_create(IntPtr context, Span<byte> pubkey, ReadOnlySpan<byte> seckey);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ec_pubkey_serialize(IntPtr context, Span<byte> serializedPublicKey, ref uint outputSize, ReadOnlySpan<byte> publicKey, uint flags);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ec_pubkey_serialize(IntPtr context, Span<byte> serializedPublicKey, ref uint outputSize, ReadOnlySpan<byte> publicKey, uint flags);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ecdsa_sign_recoverable(IntPtr context, ReadOnlySpan<byte> signature, ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> privateKey, IntPtr nonceFunction, IntPtr nonceData);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ecdsa_sign_recoverable(IntPtr context, ReadOnlySpan<byte> signature, ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> privateKey, IntPtr nonceFunction, IntPtr nonceData);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ecdsa_recoverable_signature_serialize_compact(IntPtr context, ReadOnlySpan<byte> compactSignature, out int recoveryId, ReadOnlySpan<byte> signature);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ecdsa_recoverable_signature_serialize_compact(IntPtr context, ReadOnlySpan<byte> compactSignature, out int recoveryId, ReadOnlySpan<byte> signature);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, Span<byte> signature, Span<byte> compactSignature, int recoveryId);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, Span<byte> signature, Span<byte> compactSignature, int recoveryId);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ecdsa_recover(IntPtr context, Span<byte> publicKey, Span<byte> signature, ReadOnlySpan<byte> message);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ecdsa_recover(IntPtr context, Span<byte> publicKey, Span<byte> signature, ReadOnlySpan<byte> message);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ecdh(IntPtr context, ReadOnlySpan<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey, IntPtr hashFunctionPointer, IntPtr data);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ecdh(IntPtr context, ReadOnlySpan<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey, IntPtr hashFunctionPointer, IntPtr data);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_ec_pubkey_parse(IntPtr ctx, Span<byte> pubkey, ReadOnlySpan<byte> input, uint inputlen);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_ec_pubkey_parse(IntPtr ctx, Span<byte> pubkey, ReadOnlySpan<byte> input, uint inputlen);
 
-    [DllImport(LibraryName)]
-    public static extern int secp256k1_context_randomize(nint ctx, Span<byte> seed32);
+    [LibraryImport(LibraryName)]
+    public static partial int secp256k1_context_randomize(nint ctx, Span<byte> seed32);
 #pragma warning restore CA1401 // P/Invokes should not be visible
 
     /* constants from pycoin (https://github.com/richardkiss/pycoin)*/
@@ -414,7 +414,7 @@ public static class SecP256k1
 
             var arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
-            return NativeLibrary.Load($"runtimes/{platform}-{arch}/native/{name}", context, DllImportSearchPath.AssemblyDirectory);
+            return NativeLibrary.Load($"runtimes/{platform}-{arch}/native/{name}", context, LibraryImportSearchPath.AssemblyDirectory);
         };
     }
 }
