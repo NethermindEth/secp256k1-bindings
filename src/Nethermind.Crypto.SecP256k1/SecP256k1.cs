@@ -14,7 +14,7 @@ public static class SecP256k1
 {
     private const string LibraryName = "secp256k1";
 
-    static unsafe SecP256k1()
+    static SecP256k1()
     {
         SetLibraryFallbackResolver();
 
