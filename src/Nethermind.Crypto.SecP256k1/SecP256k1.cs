@@ -42,7 +42,7 @@ public static partial class SecP256k1
     public static partial int secp256k1_ec_pubkey_create(IntPtr context, Span<byte> pubkey, ReadOnlySpan<byte> seckey);
 
     [LibraryImport(LibraryName)]
-    public static partial int secp256k1_ec_pubkey_serialize(IntPtr context, Span<byte> serializedPublicKey, ref uint outputSize, ReadOnlySpan<byte> publicKey, uint flags);
+    public static partial int secp256k1_ec_pubkey_serialize(IntPtr context, Span<byte> serializedPublicKey, ref nuint outputSize, ReadOnlySpan<byte> publicKey, uint flags);
 
     [LibraryImport(LibraryName)]
     public static partial int secp256k1_ecdsa_sign_recoverable(IntPtr context, ReadOnlySpan<byte> signature, ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> privateKey, IntPtr nonceFunction, IntPtr nonceData);
@@ -60,7 +60,7 @@ public static partial class SecP256k1
     public static partial int secp256k1_ecdh(IntPtr context, ReadOnlySpan<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey, IntPtr hashFunctionPointer, IntPtr data);
 
     [LibraryImport(LibraryName)]
-    public static partial int secp256k1_ec_pubkey_parse(IntPtr ctx, Span<byte> pubkey, ReadOnlySpan<byte> input, uint inputlen);
+    public static partial int secp256k1_ec_pubkey_parse(IntPtr ctx, Span<byte> pubkey, ReadOnlySpan<byte> input, nuint inputlen);
 
     [LibraryImport(LibraryName)]
     public static partial int secp256k1_context_randomize(nint ctx, Span<byte> seed32);
@@ -111,7 +111,7 @@ public static partial class SecP256k1
             return false;
         }
 
-        uint outputSize = (uint)serializedPublicKey.Length;
+        nuint outputSize = (nuint)serializedPublicKey.Length;
         uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
 
         bool serializationFailed = secp256k1_ec_pubkey_serialize(Context, serializedPublicKey, ref outputSize, publicKey, flags) == 0;
@@ -215,7 +215,7 @@ public static partial class SecP256k1
         {
             throw new ArgumentException($"{nameof(output)} length should be {expectedLength}");
         }
-       
+
         if (secp256k1_ecdsa_recoverable_signature_parse_compact(
             Context, recoverableSignature, compactSignature, recoveryId) == 0)
         {
@@ -228,7 +228,7 @@ public static partial class SecP256k1
         }
 
         uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
-        uint outputSize = (uint)output.Length;
+        nuint outputSize = (nuint)output.Length;
 
         if (secp256k1_ec_pubkey_serialize(
             Context, output, ref outputSize, publicKey, flags) == 0)
@@ -354,10 +354,10 @@ public static partial class SecP256k1
             throw new ArgumentException($"{nameof(publicKey)} must be {expectedInputLength} bytes");
         }
 
-        uint newLength = (uint)serializedPubKeyLength;
+        nuint newLength = (nuint)serializedPubKeyLength;
 
         bool success = secp256k1_ec_pubkey_serialize(Context, serializedPublicKeyOutput, ref newLength, publicKey, flags) == 1;
-        return success && newLength == serializedPubKeyLength;
+        return success && newLength == (nuint)serializedPubKeyLength;
     }
 
     private static void ToPublicKeyArray(Span<byte> serializedKey, ReadOnlySpan<byte> unmanaged)
