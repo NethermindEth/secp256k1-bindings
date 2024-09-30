@@ -294,7 +294,7 @@ public static class SecP256k1
         return PublicKeySerialize(serializedKey, publicKey);
     }
 
-    public static byte[]? Decompress(ReadOnlySpan<byte> compressed)
+    public static byte[]? Decompress(ReadOnlySpan<byte> compressed) // Compatable with old API
     {
         byte[] buffer = new byte[65];
         if (Decompress(compressed, buffer))
