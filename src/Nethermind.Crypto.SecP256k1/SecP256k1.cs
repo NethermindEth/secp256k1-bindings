@@ -39,10 +39,10 @@ public static class SecP256k1
     public static extern int secp256k1_ec_seckey_verify(IntPtr context, ReadOnlySpan<byte> seckey);
 
     [DllImport(LibraryName)]
-    public static unsafe extern int secp256k1_ec_pubkey_create(IntPtr context, Span<byte> pubkey, ReadOnlySpan<byte> seckey);
+    public static extern int secp256k1_ec_pubkey_create(IntPtr context, Span<byte> pubkey, ReadOnlySpan<byte> seckey);
 
     [DllImport(LibraryName)]
-    public static unsafe extern int secp256k1_ec_pubkey_serialize(IntPtr context, Span<byte> serializedPublicKey, ref uint outputSize, ReadOnlySpan<byte> publicKey, uint flags);
+    public static extern int secp256k1_ec_pubkey_serialize(IntPtr context, Span<byte> serializedPublicKey, ref uint outputSize, ReadOnlySpan<byte> publicKey, uint flags);
 
     [DllImport(LibraryName)]
     public static extern int secp256k1_ecdsa_sign_recoverable(IntPtr context, ReadOnlySpan<byte> signature, ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> privateKey, IntPtr nonceFunction, IntPtr nonceData);
@@ -51,19 +51,19 @@ public static class SecP256k1
     public static extern int secp256k1_ecdsa_recoverable_signature_serialize_compact(IntPtr context, ReadOnlySpan<byte> compactSignature, out int recoveryId, ReadOnlySpan<byte> signature);
 
     [DllImport(LibraryName)]
-    public static unsafe extern int secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, Span<byte> signature, Span<byte> compactSignature, int recoveryId);
+    public static extern int secp256k1_ecdsa_recoverable_signature_parse_compact(IntPtr context, Span<byte> signature, Span<byte> compactSignature, int recoveryId);
 
     [DllImport(LibraryName)]
-    public static unsafe extern int secp256k1_ecdsa_recover(IntPtr context, Span<byte> publicKey, Span<byte> signature, ReadOnlySpan<byte> message);
+    public static extern int secp256k1_ecdsa_recover(IntPtr context, Span<byte> publicKey, Span<byte> signature, ReadOnlySpan<byte> message);
 
     [DllImport(LibraryName)]
     public static extern int secp256k1_ecdh(IntPtr context, ReadOnlySpan<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey, IntPtr hashFunctionPointer, IntPtr data);
 
     [DllImport(LibraryName)]
-    public static unsafe extern int secp256k1_ec_pubkey_parse(IntPtr ctx, Span<byte> pubkey, ReadOnlySpan<byte> input, uint inputlen);
+    public static extern int secp256k1_ec_pubkey_parse(IntPtr ctx, Span<byte> pubkey, ReadOnlySpan<byte> input, uint inputlen);
 
     [DllImport(LibraryName)]
-    public static unsafe extern int secp256k1_context_randomize(nint ctx, Span<byte> seed32);
+    public static extern int secp256k1_context_randomize(nint ctx, Span<byte> seed32);
 #pragma warning restore CA1401 // P/Invokes should not be visible
 
     /* constants from pycoin (https://github.com/richardkiss/pycoin)*/
