@@ -37,7 +37,9 @@ jobs:
       - name: Set up GNU C compiler for arm64
         run: |
           sudo apt-get update && sudo apt-get install -y gcc-riscv64-linux-gnu
-          sudo apt search riscv64-unknown-
+          wget https://toolchains.bootlin.com/downloads/releases/toolchains/riscv64-lp64d/tarballs/riscv64-lp64d--glibc--stable-2024.05-1.tar.xz
+          sudo mkdir -p /opt/bootlin
+          sudo tar jxf riscv64-lp64d--glibc--stable-2024.05-1.tar.xz -C /opt/bootlin/
 
       - name: Build
         working-directory: secp256k1
@@ -46,7 +48,7 @@ jobs:
           cmake -S . -B build \
             -D CMAKE_BUILD_TYPE=Release \
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON \
-            -D CMAKE_C_COMPILER=riscv64-unknown-elf- \
+            -D CMAKE_C_COMPILER=/opt/bootlin/riscv64-lp64d--glibc--stable-2024.05-1/bin/riscv64-buildroot-linux-gnu- \
             -D CMAKE_SYSTEM_NAME=Linux \
             -D CMAKE_SYSTEM_PROCESSOR=riscv64
           cmake --build build
