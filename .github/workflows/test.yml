@@ -121,7 +121,7 @@ jobs:
 
   test:
     name: Test
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux]
     env:
       BUILD_CONFIG: release
     runs-on: ubuntu-latest
