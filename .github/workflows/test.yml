@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-${{ matrix.arch }}
-          path: secp256k1/build/src/libsecp256k1.so
+          path: secp256k1/build/lib/libsecp256k1.so
           retention-days: ${{ env.RETENTION }}
           if-no-files-found: error
 
@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: osx-${{ env.ARCH }}
-          path: secp256k1/build/src/libsecp256k1.dylib
+          path: secp256k1/build/lib/libsecp256k1.dylib
           retention-days: ${{ env.RETENTION }}
           if-no-files-found: error
 
@@ -109,12 +109,12 @@ jobs:
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
             -D SECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build --config Release
-          ls build/src/Release/*.dll | rni -NewName secp256k1.dll
+          ls build/bin/Release/*.dll | rni -NewName secp256k1.dll
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: win-x64
-          path: secp256k1/build/src/Release/secp256k1.dll
+          path: secp256k1/build/bin/Release/secp256k1.dll
           retention-days: ${{ env.RETENTION }}
           if-no-files-found: error
 
