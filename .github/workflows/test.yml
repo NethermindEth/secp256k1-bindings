@@ -39,7 +39,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y gcc-riscv64-linux-gnu
           wget https://toolchains.bootlin.com/downloads/releases/toolchains/riscv64-lp64d/tarballs/riscv64-lp64d--glibc--stable-2024.05-1.tar.xz
           sudo mkdir -p /opt/bootlin
-          sudo tar jxf riscv64-lp64d--glibc--stable-2024.05-1.tar.xz -C /opt/bootlin/
+          sudo tar xf riscv64-lp64d--glibc--stable-2024.05-1.tar.xz -C /opt/bootlin/
 
       - name: Build
         working-directory: secp256k1
