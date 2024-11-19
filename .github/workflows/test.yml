@@ -40,6 +40,7 @@ jobs:
           wget https://toolchains.bootlin.com/downloads/releases/toolchains/riscv64-lp64d/tarballs/riscv64-lp64d--glibc--stable-2024.05-1.tar.xz
           sudo mkdir -p /opt/bootlin
           sudo tar xf riscv64-lp64d--glibc--stable-2024.05-1.tar.xz -C /opt/bootlin/
+          ls /opt/bootlin/riscv64-lp64d--glibc--stable-2024.05-1/bin/
 
       - name: Build
         working-directory: secp256k1
