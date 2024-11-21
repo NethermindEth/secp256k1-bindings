@@ -4,13 +4,15 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
 
 namespace Nethermind.Crypto;
 
-public static class SecP256k1
+public unsafe static class SecP256k1
 {
     private const string LibraryName = "secp256k1";
 
@@ -228,36 +230,20 @@ public static class SecP256k1
 
     unsafe delegate int secp256k1_ecdh_hash_function(void* output, void* x, void* y, IntPtr data);
 
+    private const int OutputSize = 32;
+
+    private readonly static secp256k1_ecdh_hash_function _hashFunction = static (void* output, void* x, void* y, IntPtr d) =>
+    {
+        Unsafe.AsRef<Vector256<byte>>(output) = Vector256.Load((byte*)x);
+        return 1;
+    };
+
+    private readonly static IntPtr _hashFunctionPtr = Marshal.GetFunctionPointerForDelegate(_hashFunction);
+
     public static unsafe bool Ecdh(byte[] agreement, byte[] publicKey, byte[] privateKey)
     {
-        int outputLength = agreement.Length;
-
-        // TODO: should probably do that only once
-        secp256k1_ecdh_hash_function hashFunctionPtr = (void* output, void* x, void* y, IntPtr d) =>
-        {
-            Span<byte> outputSpan = new(output, outputLength);
-            Span<byte> xSpan = new(x, 32);
-            if (xSpan.Length < 32)
-            {
-                return 0;
-            }
-
-            xSpan.CopyTo(outputSpan);
-            return 1;
-        };
-
-        GCHandle gch = GCHandle.Alloc(hashFunctionPtr);
-        try
-        {
-            IntPtr fp = Marshal.GetFunctionPointerForDelegate(hashFunctionPtr);
-            {
-                return secp256k1_ecdh(Context, agreement, publicKey, privateKey, fp, IntPtr.Zero) == 1;
-            }
-        }
-        finally
-        {
-            gch.Free();
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(agreement.Length, OutputSize);
+        return secp256k1_ecdh(Context, agreement, publicKey, privateKey, _hashFunctionPtr, IntPtr.Zero) == 1;
     }
 
     public static byte[] EcdhSerialized(byte[] publicKey, byte[] privateKey)
