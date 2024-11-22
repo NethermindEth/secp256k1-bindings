@@ -48,7 +48,7 @@ public static unsafe partial class SecP256k1
     public static unsafe partial int secp256k1_ec_pubkey_create(IntPtr context, void* pubkey, [In] byte[] seckey);
 
     [LibraryImport(LibraryName)]
-    public static unsafe partial int secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref uint outputSize, void* publicKey, uint flags);
+    public static unsafe partial int secp256k1_ec_pubkey_serialize(IntPtr context, void* serializedPublicKey, ref nint outputSize, void* publicKey, uint flags);
 
     [LibraryImport(LibraryName)]
     public static partial int secp256k1_ecdsa_sign_recoverable(IntPtr context, [Out] byte[] signature, [In] byte[] messageHash, [In] byte[] privateKey, IntPtr nonceFunction, IntPtr nonceData);
@@ -66,7 +66,7 @@ public static unsafe partial class SecP256k1
     public static partial int secp256k1_ecdh(IntPtr context, [Out] byte[] output, [In] byte[] publicKey, [In] byte[] privateKey, IntPtr hashFunctionPointer, IntPtr data);
 
     [LibraryImport(LibraryName)]
-    public static unsafe partial int secp256k1_ec_pubkey_parse(IntPtr ctx, void* pubkey, void* input, uint inputlen);
+    public static unsafe partial int secp256k1_ec_pubkey_parse(IntPtr ctx, void* pubkey, void* input, nint inputlen);
 
     [LibraryImport(LibraryName)]
     public static unsafe partial int secp256k1_context_randomize(nint ctx, void* seed32);
@@ -120,7 +120,7 @@ public static unsafe partial class SecP256k1
                 return null;
             }
 
-            uint outputSize = (uint)serializedPublicKey.Length;
+            nint outputSize = serializedPublicKey.Length;
             uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
 
             bool serializationFailed = secp256k1_ec_pubkey_serialize(Context, serializedPtr, ref outputSize, pubKeyPtr, flags) == 0;
@@ -185,7 +185,7 @@ public static unsafe partial class SecP256k1
             }
 
             uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
-            uint outputSize = (uint)output.Length;
+            nint outputSize = output.Length;
 
             if (secp256k1_ec_pubkey_serialize(
                 Context, serializedPublicKeyPtr, ref outputSize, &publicKey, flags) == 0)
@@ -251,7 +251,7 @@ public static unsafe partial class SecP256k1
     /// <returns>True if the public key was fully valid, false if the public key could not be parsed or is invalid.</returns>
     private static unsafe bool PublicKeyParse(Span<byte> publicKeyOutput, Span<byte> serializedPublicKey)
     {
-        int inputLen = serializedPublicKey.Length;
+        nint inputLen = serializedPublicKey.Length;
         if (inputLen != 33 && inputLen != 65)
         {
             throw new ArgumentException($"{nameof(serializedPublicKey)} must be 33 or 65 bytes");
@@ -265,7 +265,7 @@ public static unsafe partial class SecP256k1
         fixed (byte* pubKeyPtr = &MemoryMarshal.GetReference(publicKeyOutput), serializedPtr = &MemoryMarshal.GetReference(serializedPublicKey))
         {
             return secp256k1_ec_pubkey_parse(
-                Context, pubKeyPtr, serializedPtr, (uint)inputLen) == 1;
+                Context, pubKeyPtr, serializedPtr, inputLen) == 1;
         }
     }
 
@@ -293,7 +293,7 @@ public static unsafe partial class SecP256k1
             throw new ArgumentException($"{nameof(publicKey)} must be {expectedInputLength} bytes");
         }
 
-        uint newLength = (uint)serializedPubKeyLength;
+        nint newLength = serializedPubKeyLength;
 
         fixed (byte* serializedPtr = &MemoryMarshal.GetReference(serializedPublicKeyOutput), pubKeyPtr = &MemoryMarshal.GetReference(publicKey))
         {
