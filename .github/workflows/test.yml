@@ -3,7 +3,7 @@ name: Test
 on:
   pull_request:
   push:
-    branches: [test/riscv64]
+    branches: [test/riscv64-apt]
   workflow_dispatch:
     inputs:
       ref:
