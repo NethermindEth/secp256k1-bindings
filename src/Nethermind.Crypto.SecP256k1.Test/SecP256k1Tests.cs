@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using System;
-using FluentAssertions;
 using NUnit.Framework;
 
 namespace Nethermind.Crypto.Secp256k1.Test;
@@ -75,7 +74,7 @@ public class SecP256k1Tests
         byte[]? signature = SecP256k1.SignCompact(messageHash, privateKey, out int recoveryId);
         byte[] recovered = new byte[33];
         bool result = SecP256k1.RecoverKeyFromCompact(recovered, messageHash, signature, recoveryId, true);
-        result.Should().BeTrue();
+        Assert.That(result, Is.True);
     }
 
     [Test]
