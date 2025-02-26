@@ -151,7 +151,7 @@ jobs:
 
       - name: Build
         working-directory: src/Nethermind.Crypto.SecP256k1
-        run: dotnet build -c ${{ env.BUILD_CONFIG }} --no-restore
+        run: dotnet build -c ${{ env.BUILD_CONFIG }} --no-restore -p:Commit=$GITHUB_SHA
 
       - name: Test
         working-directory: src/Nethermind.Crypto.SecP256k1.Test
