@@ -1,4 +1,4 @@
-name: Test
+name: Test / Publish
 
 on:
   pull_request:
@@ -155,7 +155,7 @@ jobs:
 
       - name: Test
         working-directory: src/Nethermind.Crypto.SecP256k1.Test
-        run: dotnet test -c ${{ env.BUILD_CONFIG }} --no-restore
+        run: dotnet run -c ${{ env.BUILD_CONFIG }} --no-restore
 
       - name: Publish
         if: ${{ inputs.publish }}
