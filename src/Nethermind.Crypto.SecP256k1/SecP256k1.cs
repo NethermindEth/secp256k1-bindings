@@ -157,7 +157,7 @@ public static unsafe partial class SecP256k1
     }
 
     [SkipLocalsInit]
-    public static unsafe bool RecoverKeyFromCompact(Span<byte> output, byte[] messageHash, Span<byte> compactSignature, int recoveryId, bool compressed)
+    public static unsafe bool RecoverKeyFromCompact(Span<byte> output, byte[] messageHash, ReadOnlySpan<byte> compactSignature, int recoveryId, bool compressed)
     {
         int expectedLength = compressed ? 33 : 65;
 
