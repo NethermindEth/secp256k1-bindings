@@ -53,12 +53,18 @@ public static unsafe partial class SecP256k1
 
     public static bool VerifyPrivateKey(ReadOnlySpan<byte> privateKey)
     {
+        if (privateKey.Length == 0)
+            return false;
+
         fixed (byte* ptr = privateKey)
             return secp256k1_ec_seckey_verify(_context, ptr) == 1;
     }
 
     public static byte[]? GetPublicKey(ReadOnlySpan<byte> privateKey, bool compressed)
     {
+        if (privateKey.Length == 0)
+            return null;
+
         Span<byte> output = stackalloc byte[compressed ? 33 : 65];
         byte* publicKey = stackalloc byte[64];
 
@@ -84,8 +90,12 @@ public static unsafe partial class SecP256k1
 
     public static byte[]? SignCompact(ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> privateKey, out int recoveryId)
     {
-        byte* signature = stackalloc byte[65];
         recoveryId = 0;
+
+        if (privateKey.Length == 0)
+            return null;
+
+        byte* signature = stackalloc byte[65];
 
         fixed (byte* messageHashPtr = messageHash)
         fixed (byte* privateKeyPtr = privateKey)
@@ -113,7 +123,7 @@ public static unsafe partial class SecP256k1
     {
         int expectedLength = compressed ? 33 : 65;
 
-        ArgumentOutOfRangeException.ThrowIfNotEqual(output.Length, expectedLength);
+        ArgumentOutOfRangeException.ThrowIfNotEqual(output.Length, expectedLength, nameof(output));
 
         byte* recoverableSignature = stackalloc byte[65];
 
@@ -156,7 +166,8 @@ public static unsafe partial class SecP256k1
 
     public static bool Ecdh(Span<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(output.Length, 32);
+        ArgumentOutOfRangeException.ThrowIfLessThan(output.Length, 32, nameof(output));
+        ArgumentOutOfRangeException.ThrowIfEqual(privateKey.Length, 0, nameof(privateKey));
 
         delegate* unmanaged[Cdecl]<byte*, byte*, byte*, void*, int> hashfp = &_hashFunction;
 
