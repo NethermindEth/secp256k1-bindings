@@ -33,7 +33,7 @@ public static unsafe partial class SecP256k1
 
     private static readonly nint _context;
 
-    static unsafe SecP256k1()
+    static SecP256k1()
     {
         SetLibraryFallbackResolver();
 
@@ -57,16 +57,15 @@ public static unsafe partial class SecP256k1
             return secp256k1_ec_seckey_verify(_context, ptr) == 1;
     }
 
-    public static unsafe byte[]? GetPublicKey(ReadOnlySpan<byte> privateKey, bool compressed)
+    public static byte[]? GetPublicKey(ReadOnlySpan<byte> privateKey, bool compressed)
     {
-        Span<byte> publicKey = stackalloc byte[64];
         Span<byte> output = stackalloc byte[compressed ? 33 : 65];
+        byte* publicKey = stackalloc byte[64];
 
         fixed (byte* outputPtr = output)
-        fixed (byte* publicKeyPtr = publicKey)
         fixed (byte* privateKeyPtr = privateKey)
         {
-            bool failed = secp256k1_ec_pubkey_create(_context, publicKeyPtr, privateKeyPtr) == 0;
+            bool failed = secp256k1_ec_pubkey_create(_context, publicKey, privateKeyPtr) == 0;
 
             if (failed)
                 return null;
@@ -74,7 +73,7 @@ public static unsafe partial class SecP256k1
             var outputLen = (nuint)output.Length;
             uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
 
-            failed = secp256k1_ec_pubkey_serialize(_context, outputPtr, ref outputLen, publicKeyPtr, flags) == 0;
+            failed = secp256k1_ec_pubkey_serialize(_context, outputPtr, ref outputLen, publicKey, flags) == 0;
 
             if (failed)
                 return null;
@@ -85,14 +84,13 @@ public static unsafe partial class SecP256k1
 
     public static byte[]? SignCompact(ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> privateKey, out int recoveryId)
     {
-        Span<byte> signature = stackalloc byte[65];
+        byte* signature = stackalloc byte[65];
         recoveryId = 0;
 
-        fixed (byte* signaturePtr = signature)
         fixed (byte* messageHashPtr = messageHash)
         fixed (byte* privateKeyPtr = privateKey)
         {
-            if (secp256k1_ecdsa_sign_recoverable(_context, signaturePtr, messageHashPtr, privateKeyPtr, null, null) == 0)
+            if (secp256k1_ecdsa_sign_recoverable(_context, signature, messageHashPtr, privateKeyPtr, null, null) == 0)
                 return null;
 
             Span<byte> compactSignature = stackalloc byte[64];
@@ -100,7 +98,7 @@ public static unsafe partial class SecP256k1
             fixed (byte* compactSignaturePtr = compactSignature)
             {
                 if (secp256k1_ecdsa_recoverable_signature_serialize_compact(
-                    _context, compactSignaturePtr, out recoveryId, signaturePtr) == 0)
+                    _context, compactSignaturePtr, out recoveryId, signature) == 0)
                 {
                     return null;
                 }
@@ -111,28 +109,28 @@ public static unsafe partial class SecP256k1
     }
 
     [SkipLocalsInit]
-    public static unsafe bool RecoverKeyFromCompact(Span<byte> output, ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> compactSignature, int recoveryId, bool compressed)
+    public static bool RecoverKeyFromCompact(Span<byte> output, ReadOnlySpan<byte> messageHash, ReadOnlySpan<byte> compactSignature, int recoveryId, bool compressed)
     {
         int expectedLength = compressed ? 33 : 65;
 
         ArgumentOutOfRangeException.ThrowIfNotEqual(output.Length, expectedLength);
 
-        Span<byte> recoverableSignature = stackalloc byte[65];
+        byte* recoverableSignature = stackalloc byte[65];
 
         fixed (byte* compactSigPtr = compactSignature)
-        fixed (byte* recoverableSignaturePtr = recoverableSignature)
         {
             if (secp256k1_ecdsa_recoverable_signature_parse_compact(
-                _context, recoverableSignaturePtr, compactSigPtr, recoveryId) == 0)
+                _context, recoverableSignature, compactSigPtr, recoveryId) == 0)
             {
                 return false;
             }
 
             Unsafe.SkipInit(out Vector512<byte> publicKey);
+            var publicKeyPtr = (byte*)&publicKey;
 
             fixed (byte* messageHashPtr = messageHash)
             {
-                if (secp256k1_ecdsa_recover(_context, (byte*)&publicKey, recoverableSignaturePtr, messageHashPtr) == 0)
+                if (secp256k1_ecdsa_recover(_context, publicKeyPtr, recoverableSignature, messageHashPtr) == 0)
                     return false;
             }
 
@@ -140,7 +138,7 @@ public static unsafe partial class SecP256k1
             var outputLen = (nuint)output.Length;
 
             fixed (byte* outputPtr = output)
-                return secp256k1_ec_pubkey_serialize(_context, outputPtr, ref outputLen, &publicKey, flags) != 0;
+                return secp256k1_ec_pubkey_serialize(_context, outputPtr, ref outputLen, publicKeyPtr, flags) != 0;
         }
     }
 
@@ -156,7 +154,7 @@ public static unsafe partial class SecP256k1
 
     //private readonly static nint _hashFunctionPtr = Marshal.GetFunctionPointerForDelegate(_hashFunction);
 
-    public static unsafe bool Ecdh(Span<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey)
+    public static bool Ecdh(Span<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(output.Length, 32);
 
@@ -202,9 +200,9 @@ public static unsafe partial class SecP256k1
     /// <param name="publicKey">(Output) pointer to a pubkey object. If 1 is returned, it is set to a parsed version of input. If not, its value is undefined.</param>
     /// <param name="serializedPublicKey">Serialized public key.</param>
     /// <returns>True if the public key was fully valid, false if the public key could not be parsed or is invalid.</returns>
-    private static unsafe bool PublicKeyParse(Span<byte> publicKey, Span<byte> serializedPublicKey)
+    private static bool PublicKeyParse(Span<byte> publicKey, Span<byte> serializedPublicKey)
     {
-        nint inputLen = serializedPublicKey.Length;
+        var inputLen = serializedPublicKey.Length;
 
         if (inputLen != 33 && inputLen != 65)
             throw new ArgumentException($"{nameof(serializedPublicKey)} must be 33 or 65 bytes");
@@ -213,7 +211,7 @@ public static unsafe partial class SecP256k1
 
         fixed (byte* publicKeyPtr = publicKey)
         fixed (byte* serializedPtr = serializedPublicKey)
-            return secp256k1_ec_pubkey_parse(_context, publicKeyPtr, serializedPtr, inputLen) == 1;
+            return secp256k1_ec_pubkey_parse(_context, publicKeyPtr, serializedPtr, (nuint)inputLen) == 1;
     }
 
     /// <summary>
@@ -222,7 +220,7 @@ public static unsafe partial class SecP256k1
     /// <param name="serializedPublicKeyOutput">65-byte (if compressed==0) or 33-byte (if compressed==1) output to place the serialized key in.</param>
     /// <param name="publicKey">The secp256k1_pubkey initialized public key.</param>
     /// <param name="flags">SECP256K1_EC_COMPRESSED if serialization should be in compressed format, otherwise SECP256K1_EC_UNCOMPRESSED.</param>
-    private static unsafe bool PublicKeySerialize(ReadOnlySpan<byte> serializedPublicKeyOutput, Span<byte> publicKey, uint flags = Secp256K1EcUncompressed)
+    private static bool PublicKeySerialize(ReadOnlySpan<byte> serializedPublicKeyOutput, Span<byte> publicKey, uint flags = Secp256K1EcUncompressed)
     {
         bool compressed = (flags & Secp256K1EcCompressed) == Secp256K1EcCompressed;
         int serializedPubKeyLength = compressed ? 33 : 65;
