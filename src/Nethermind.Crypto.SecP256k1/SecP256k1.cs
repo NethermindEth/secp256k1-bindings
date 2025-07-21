@@ -35,7 +35,7 @@ public static unsafe partial class SecP256k1
 
     static SecP256k1()
     {
-        SetLibraryFallbackResolver();
+        AssemblyLoadContext.Default.ResolvingUnmanagedDll += OnResolvingUnmanagedDll;
 
         _context = secp256k1_context_create(Secp256K1ContextSign | Secp256K1ContextVerify);
 
@@ -43,7 +43,7 @@ public static unsafe partial class SecP256k1
 
         RandomNumberGenerator.Fill(seed);
 
-        fixed (byte* ptr = seed)
+        fixed (byte* ptr = &MemoryMarshal.GetReference(seed))
         {
             var result = secp256k1_context_randomize(_context, ptr);
 
@@ -56,7 +56,7 @@ public static unsafe partial class SecP256k1
         if (privateKey.Length == 0)
             return false;
 
-        fixed (byte* ptr = privateKey)
+        fixed (byte* ptr = &MemoryMarshal.GetReference(privateKey))
             return secp256k1_ec_seckey_verify(_context, ptr) == 1;
     }
 
@@ -68,8 +68,8 @@ public static unsafe partial class SecP256k1
         Span<byte> output = stackalloc byte[compressed ? 33 : 65];
         byte* publicKey = stackalloc byte[64];
 
-        fixed (byte* outputPtr = output)
-        fixed (byte* privateKeyPtr = privateKey)
+        fixed (byte* outputPtr = &MemoryMarshal.GetReference(output))
+        fixed (byte* privateKeyPtr = &MemoryMarshal.GetReference(privateKey))
         {
             bool failed = secp256k1_ec_pubkey_create(_context, publicKey, privateKeyPtr) == 0;
 
@@ -97,15 +97,15 @@ public static unsafe partial class SecP256k1
 
         byte* signature = stackalloc byte[65];
 
-        fixed (byte* messageHashPtr = messageHash)
-        fixed (byte* privateKeyPtr = privateKey)
+        fixed (byte* messageHashPtr = &MemoryMarshal.GetReference(messageHash))
+        fixed (byte* privateKeyPtr = &MemoryMarshal.GetReference(privateKey))
         {
             if (secp256k1_ecdsa_sign_recoverable(_context, signature, messageHashPtr, privateKeyPtr, null, null) == 0)
                 return null;
 
             Span<byte> compactSignature = stackalloc byte[64];
 
-            fixed (byte* compactSignaturePtr = compactSignature)
+            fixed (byte* compactSignaturePtr = &MemoryMarshal.GetReference(compactSignature))
             {
                 if (secp256k1_ecdsa_recoverable_signature_serialize_compact(
                     _context, compactSignaturePtr, out recoveryId, signature) == 0)
@@ -127,7 +127,7 @@ public static unsafe partial class SecP256k1
 
         byte* recoverableSignature = stackalloc byte[65];
 
-        fixed (byte* compactSigPtr = compactSignature)
+        fixed (byte* compactSigPtr = &MemoryMarshal.GetReference(compactSignature))
         {
             if (secp256k1_ecdsa_recoverable_signature_parse_compact(
                 _context, recoverableSignature, compactSigPtr, recoveryId) == 0)
@@ -138,7 +138,7 @@ public static unsafe partial class SecP256k1
             Unsafe.SkipInit(out Vector512<byte> publicKey);
             var publicKeyPtr = (byte*)&publicKey;
 
-            fixed (byte* messageHashPtr = messageHash)
+            fixed (byte* messageHashPtr = &MemoryMarshal.GetReference(messageHash))
             {
                 if (secp256k1_ecdsa_recover(_context, publicKeyPtr, recoverableSignature, messageHashPtr) == 0)
                     return false;
@@ -147,33 +147,21 @@ public static unsafe partial class SecP256k1
             uint flags = compressed ? Secp256K1EcCompressed : Secp256K1EcUncompressed;
             var outputLen = (nuint)output.Length;
 
-            fixed (byte* outputPtr = output)
+            fixed (byte* outputPtr = &MemoryMarshal.GetReference(output))
                 return secp256k1_ec_pubkey_serialize(_context, outputPtr, ref outputLen, publicKeyPtr, flags) != 0;
         }
     }
-
-    //unsafe delegate int secp256k1_ecdh_hash_function(void* output, void* x, void* y, nint data);
-
-    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static int _hashFunction(byte* output, byte* x, byte* y, void* d)
-    {
-        Unsafe.AsRef<Vector256<byte>>(output) = Vector256.Load(x);
-
-        return 1;
-    }
-
-    //private readonly static nint _hashFunctionPtr = Marshal.GetFunctionPointerForDelegate(_hashFunction);
 
     public static bool Ecdh(Span<byte> output, ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> privateKey)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(output.Length, 32, nameof(output));
         ArgumentOutOfRangeException.ThrowIfEqual(privateKey.Length, 0, nameof(privateKey));
 
-        delegate* unmanaged[Cdecl]<byte*, byte*, byte*, void*, int> hashfp = &_hashFunction;
+        delegate* unmanaged[Cdecl]<byte*, byte*, byte*, void*, int> hashfp = &HashFunction;
 
-        fixed (byte* outputPtr = output)
-        fixed (byte* publicKeyPtr = publicKey)
-        fixed (byte* privateKeyPtr = privateKey)
+        fixed (byte* outputPtr = &MemoryMarshal.GetReference(output))
+        fixed (byte* publicKeyPtr = &MemoryMarshal.GetReference(publicKey))
+        fixed (byte* privateKeyPtr = &MemoryMarshal.GetReference(privateKey))
             return secp256k1_ecdh(_context, outputPtr, publicKeyPtr, privateKeyPtr, hashfp, null) == 1;
     }
 
@@ -202,6 +190,14 @@ public static unsafe partial class SecP256k1
         return serializedKey.ToArray();
     }
 
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int HashFunction(byte* output, byte* x, byte* y, void* d)
+    {
+        Unsafe.AsRef<Vector256<byte>>(output) = Vector256.Load(x);
+
+        return 1;
+    }
+
     /// <summary>
     /// Parse a variable-length public key into the pubkey object.
     /// This function supports parsing compressed (33 bytes, header byte 0x02 or
@@ -220,8 +216,8 @@ public static unsafe partial class SecP256k1
 
         ArgumentOutOfRangeException.ThrowIfLessThan(publicKey.Length, 64, nameof(publicKey));
 
-        fixed (byte* publicKeyPtr = publicKey)
-        fixed (byte* serializedPtr = serializedPublicKey)
+        fixed (byte* publicKeyPtr = &MemoryMarshal.GetReference(publicKey))
+        fixed (byte* serializedPtr = &MemoryMarshal.GetReference(serializedPublicKey))
             return secp256k1_ec_pubkey_parse(_context, publicKeyPtr, serializedPtr, (nuint)inputLen) == 1;
     }
 
@@ -249,8 +245,8 @@ public static unsafe partial class SecP256k1
 
         var newLength = (nuint)serializedPubKeyLength;
 
-        fixed (byte* serializedPtr = serializedPublicKeyOutput)
-        fixed (byte* pubKeyPtr = publicKey)
+        fixed (byte* serializedPtr = &MemoryMarshal.GetReference(serializedPublicKeyOutput))
+        fixed (byte* pubKeyPtr = &MemoryMarshal.GetReference(publicKey))
         {
             bool success = secp256k1_ec_pubkey_serialize(
                 _context, serializedPtr, ref newLength, pubKeyPtr, flags) == 1;
@@ -278,40 +274,33 @@ public static unsafe partial class SecP256k1
             throw new CryptographicException("Failed serializing public key");
     }
 
-    private static void SetLibraryFallbackResolver()
+    private static nint OnResolvingUnmanagedDll(Assembly context, string name)
     {
-        Assembly assembly = typeof(SecP256k1).Assembly;
+        if (context != typeof(SecP256k1).Assembly || !LibraryName.Equals(name, StringComparison.Ordinal))
+            return nint.Zero;
 
-        AssemblyLoadContext.GetLoadContext(assembly)!.ResolvingUnmanagedDll += (Assembly context, string name) =>
+        string platform;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            if (context != assembly || !LibraryName.Equals(name, StringComparison.Ordinal))
-                return nint.Zero;
+            name = $"lib{name}.so";
+            platform = "linux";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            name = $"lib{name}.dylib";
+            platform = "osx";
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            name = $"{name}.dll";
+            platform = "win";
+        }
+        else
+            throw new PlatformNotSupportedException();
 
-            string platform;
+        var arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                name = $"lib{name}.so";
-                platform = "linux";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                name = $"lib{name}.dylib";
-                platform = "osx";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                name = $"{name}.dll";
-                platform = "win";
-            }
-            else
-            {
-                throw new PlatformNotSupportedException();
-            }
-
-            var arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
-
-            return NativeLibrary.Load($"runtimes/{platform}-{arch}/native/{name}", context, DllImportSearchPath.AssemblyDirectory);
-        };
+        return NativeLibrary.Load($"runtimes/{platform}-{arch}/native/{name}", context, DllImportSearchPath.AssemblyDirectory);
     }
 }
