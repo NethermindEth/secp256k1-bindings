@@ -1,0 +1,50 @@
+name: Test / Publish
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish to NuGet
+        default: None
+        type: choice
+        options:
+          - 'No'
+          - Staging
+          - Production
+
+jobs:
+  test-publish:
+    name: Test / Publish
+    env:
+      BUILD_CONFIG: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+
+      - name: Install dependencies
+        working-directory: src
+        run: dotnet restore
+
+      - name: Test
+        working-directory: src/Nethermind.Crypto.SecP256k1.Test
+        run: dotnet run -c $BUILD_CONFIG --no-restore -p:Commit=$GITHUB_SHA
+
+      - name: Publish
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.publish != 'No' || github.event_name == 'release'
+        working-directory: src
+        run: |
+          dotnet pack ./Nethermind.Crypto.SecP256k1 -c $BUILD_CONFIG --no-build
+          dotnet nuget push ./artifacts/package/$BUILD_CONFIG/*.nupkg \
+            -k ${{ github.event.inputs.publish == 'Staging' && secrets.NUGETTEST_API_KEY || secrets.NUGET_API_KEY }} \
+            -s ${{ github.event.inputs.publish == 'Staging' && 'https://apiint.nugettest.org/v3/index.json' || 'https://api.nuget.org/v3/index.json' }}

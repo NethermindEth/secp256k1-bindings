@@ -7,14 +7,15 @@
     <Nullable>enable</Nullable>
     <TargetFramework>net9.0</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
   </PropertyGroup>
 
   <PropertyGroup Label="ProductInfo">
     <Authors>Nethermind</Authors>
     <Copyright>Demerzel Solutions Limited</Copyright>
-    <SourceRevisionId Condition="'$(Commit)' != ''">$(Commit.Substring(0, 8))</SourceRevisionId>
-    <VersionPrefix>1.4.1</VersionPrefix>
-    <VersionSuffix></VersionSuffix>
+    <SourceRevisionId Condition="'$(Commit)' != ''">$(Commit)</SourceRevisionId>
+    <VersionPrefix>1.5.0</VersionPrefix>
+    <VersionSuffix>preview.3</VersionSuffix>
   </PropertyGroup>
 
 </Project>
