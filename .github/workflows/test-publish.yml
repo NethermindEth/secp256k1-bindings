@@ -37,7 +37,7 @@ jobs:
         run: dotnet restore
 
       - name: Test
-        working-directory: src/Nethermind.Crypto.SecP256k1.Test
+        working-directory: src/Nethermind.Crypto.SecP256k1.Tests
         run: dotnet run -c $BUILD_CONFIG --no-restore -p:Commit=$GITHUB_SHA
 
       - name: Publish

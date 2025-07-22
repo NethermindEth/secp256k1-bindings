@@ -3,6 +3,6 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
-  <Project Path="Nethermind.Crypto.SecP256k1.Test/Nethermind.Crypto.SecP256k1.Test.csproj" />
+  <Project Path="Nethermind.Crypto.SecP256k1.Tests/Nethermind.Crypto.SecP256k1.Tests.csproj" />
   <Project Path="Nethermind.Crypto.SecP256k1/Nethermind.Crypto.SecP256k1.csproj" />
 </Solution>
