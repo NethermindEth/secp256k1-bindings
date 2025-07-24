@@ -38,7 +38,7 @@ jobs:
 
       - name: Test
         working-directory: src/Nethermind.Crypto.SecP256k1.Tests
-        run: dotnet run -c $BUILD_CONFIG --no-restore -p:Commit=$GITHUB_SHA
+        run: dotnet run -c $BUILD_CONFIG --no-restore -p:SourceRevisionId=$GITHUB_SHA
 
       - name: Publish
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.publish != 'No' || github.event_name == 'release'

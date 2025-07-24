@@ -13,7 +13,6 @@
   <PropertyGroup Label="ProductInfo">
     <Authors>Nethermind</Authors>
     <Copyright>Demerzel Solutions Limited</Copyright>
-    <SourceRevisionId Condition="'$(Commit)' != ''">$(Commit)</SourceRevisionId>
     <VersionPrefix>1.5.0</VersionPrefix>
     <VersionSuffix>preview.3</VersionSuffix>
   </PropertyGroup>
