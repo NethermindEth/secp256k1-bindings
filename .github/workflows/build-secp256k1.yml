@@ -56,8 +56,6 @@ jobs:
       matrix:
         arch: [arm64, x64]
     runs-on: macos-latest
-    env:
-      ARCH: ${{ matrix.arch == 'arm64' && 'arm64' || 'x86_64' }}
     steps:
       - name: Check out secp256k1 repository
         uses: actions/checkout@v5
@@ -70,7 +68,7 @@ jobs:
           rm -rf build
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_OSX_ARCHITECTURES=$ARCH \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch == 'arm64' && 'arm64' || 'x86_64' }} \
             -DSECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build
 
