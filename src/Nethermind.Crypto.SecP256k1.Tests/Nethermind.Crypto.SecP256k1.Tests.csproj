@@ -2,8 +2,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <EnableNUnitRunner>true</EnableNUnitRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Nethermind.Crypto.Secp256k1.Test</RootNamespace>
   </PropertyGroup>
   
   <ItemGroup>

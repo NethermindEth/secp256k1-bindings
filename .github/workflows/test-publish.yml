@@ -26,7 +26,7 @@ jobs:
           - ubuntu-latest
           - ubuntu-24.04-arm
           - macos-latest
-          - macos-13
+          - macos-latest-large
           - windows-latest
           - windows-11-arm
     runs-on: ${{ matrix.os }}
@@ -41,7 +41,7 @@ jobs:
 
       - name: Test
         working-directory: src/Nethermind.Crypto.SecP256k1.Tests
-        run: dotnet run -c release
+        run: dotnet test -c release
 
   publish:
     name: Publish
