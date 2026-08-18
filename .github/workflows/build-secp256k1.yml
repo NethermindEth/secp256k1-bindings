@@ -147,4 +147,4 @@ jobs:
           git commit -am "Update secp256k1 binaries"
           git push origin $head_branch
           gh pr create -B $GITHUB_REF_NAME -H $head_branch -t "$title" \
-            -b "Built libsecp256k1 $REF"
+            -b "Built libsecp256k1 $REF."
