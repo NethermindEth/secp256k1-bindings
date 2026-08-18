@@ -138,8 +138,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           head_branch=feature/mcl-build-$GITHUB_RUN_NUMBER-$GITHUB_RUN_ATTEMPT
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b $head_branch
           git add -A
           git commit -am "Update secp256k1 binaries"
