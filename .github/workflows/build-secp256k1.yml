@@ -1,4 +1,4 @@
-name: Build secp256k1
+name: Build libsecp256k1
 
 on:
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: bitcoin-core/secp256k1
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ inputs.ref }}
 
       - name: Build
         run: |
@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: bitcoin-core/secp256k1
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ inputs.ref }}
 
       - name: Build
         run: |
@@ -91,7 +91,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: bitcoin-core/secp256k1
-          ref: ${{ github.event.inputs.ref }}
+          ref: ${{ inputs.ref }}
 
       - name: Build
         run: |
@@ -136,12 +136,15 @@ jobs:
       - name: Create a pull request
         env:
           GH_TOKEN: ${{ github.token }}
+          REF: ${{ inputs.ref }}
         run: |
-          head_branch=feature/mcl-build-$GITHUB_RUN_NUMBER-$GITHUB_RUN_ATTEMPT
+          head_branch=feature/libsecp256k1-build-$GITHUB_RUN_NUMBER-$GITHUB_RUN_ATTEMPT
+          title="chore(deps): update libsecp256k1 binaries to ${REF#v}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b $head_branch
           git add -A
           git commit -am "Update secp256k1 binaries"
           git push origin $head_branch
-          gh pr create -B $GITHUB_REF_NAME -H $head_branch -t "Update secp256k1 binaries" -b "Built and updated secp256k1 binaries"
+          gh pr create -B $GITHUB_REF_NAME -H $head_branch -t "$title" \
+            -b "Built libsecp256k1 $REF"
