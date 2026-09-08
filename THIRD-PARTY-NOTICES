@@ -1,0 +1,58 @@
+Nethermind.Crypto.SecP256k1 Third-Party Notices
+===============================================
+
+Nethermind.Crypto.SecP256k1 itself is licensed under the MIT license; see the
+LICENSE file in the source repository. This file reproduces the licenses of the
+third-party software distributed as part of this package.
+
+Two kinds of third-party software are covered:
+
+  * Source-derived code compiled into Nethermind.Crypto.SecP256k1.dll.
+
+  * Native code compiled into the libsecp256k1 libraries shipped under
+    runtimes/:
+
+      runtimes/linux-arm64/native/libsecp256k1.so
+      runtimes/linux-x64/native/libsecp256k1.so
+      runtimes/osx-arm64/native/libsecp256k1.dylib
+      runtimes/osx-x64/native/libsecp256k1.dylib
+      runtimes/win-arm64/native/secp256k1.dll
+      runtimes/win-x64/native/secp256k1.dll
+
+    These libraries link no third-party dependencies. They are built by the
+    pipeline in .github/workflows/build-secp256k1.yml in the source repository.
+
+  1. libsecp256k1 ....... MIT
+
+--------------------------------------------------------------------------------
+1. libsecp256k1
+
+https://github.com/bitcoin-core/secp256k1
+
+The native libraries listed above are builds of libsecp256k1. The interop
+declarations in Nethermind.Crypto.SecP256k1.dll are derived from libsecp256k1's
+public C API headers.
+
+MIT
+
+Copyright (c) 2013 Pieter Wuille
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+--------------------------------------------------------------------------------

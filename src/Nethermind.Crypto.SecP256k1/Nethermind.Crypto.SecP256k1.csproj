@@ -50,6 +50,7 @@
       <PackagePath>%(RelativeDir)%(Filename)%(Extension)</PackagePath>
     </None>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../THIRD-PARTY-NOTICES" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>
