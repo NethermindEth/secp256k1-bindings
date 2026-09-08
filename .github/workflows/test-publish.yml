@@ -26,7 +26,7 @@ jobs:
           - ubuntu-latest
           - ubuntu-24.04-arm
           - macos-latest
-          - macos-latest-large
+          - macos-26-intel
           - windows-latest
           - windows-11-arm
     runs-on: ${{ matrix.os }}
