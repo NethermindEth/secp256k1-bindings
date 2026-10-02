@@ -125,6 +125,10 @@ public static unsafe partial class SecP256k1
 
         ArgumentOutOfRangeException.ThrowIfNotEqual(output.Length, expectedLength, nameof(output));
 
+        // libsecp256k1 aborts the process on a recovery id outside 0..3 instead of returning 0
+        if ((uint)recoveryId > 3)
+            return false;
+
         byte* recoverableSignature = stackalloc byte[65];
 
         fixed (byte* compactSigPtr = &MemoryMarshal.GetReference(compactSignature))
@@ -180,7 +184,12 @@ public static unsafe partial class SecP256k1
     {
         Span<byte> serializedKey = stackalloc byte[65];
         Span<byte> publicKey = stackalloc byte[64];
-        PublicKeyParse(publicKey, compressed);
+
+        // A failed parse leaves a zeroed key, which libsecp256k1 rejects by aborting the process
+        if (!PublicKeyParse(publicKey, compressed))
+        {
+            throw new CryptographicException("Failed parsing public key");
+        }
 
         if (!PublicKeySerialize(serializedKey, publicKey))
         {
