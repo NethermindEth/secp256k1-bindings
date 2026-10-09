@@ -8,6 +8,10 @@ C# bindings for the Bitcoin Core libsecp256k1 library. See [global.json](./globa
 - [build-secp256k1.yml](./.github/workflows/build-secp256k1.yml): Builds libsecp256k1 for the specified version.
 - [test-publish.yml](./.github/workflows/test-publish.yml): Runs the tests and optionally publishes on NuGet.
 
+## Versioning
+
+The package version is `<libsecp256k1 version>.<run number>`. `VersionPrefix` in [Directory.Build.props](./src/Directory.Build.props) tracks the libsecp256k1 version and is updated by [build-secp256k1.yml](./.github/workflows/build-secp256k1.yml). No GitHub releases or tags are used.
+
 ## Coding guidelines
 
 - Follow [.editorconfig](./.editorconfig).
