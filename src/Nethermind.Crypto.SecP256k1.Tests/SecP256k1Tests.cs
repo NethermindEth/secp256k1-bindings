@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+using System.Security.Cryptography;
 using NUnit.Framework;
 
 namespace Nethermind.Crypto.Secp256k1.Test;
@@ -121,5 +122,36 @@ public class SecP256k1Tests
         byte[] recovered = new byte[65];
         SecP256k1.RecoverKeyFromCompact(recovered, messageHash, signature, recoveryId, false);
         Assert.That(recovered, Has.Length.EqualTo(65));
+    }
+
+    [Test]
+    public void Recover_returns_false_for_out_of_range_recovery_id([Values(-1, 4, 255)] int recoveryId)
+    {
+        byte[] privateKey = new byte[32];
+        privateKey[0] = 1;
+        byte[] messageHash = new byte[32];
+        messageHash[0] = 1;
+        byte[]? signature = SecP256k1.SignCompact(messageHash, privateKey, out _);
+        byte[] recovered = new byte[33];
+        Assert.That(SecP256k1.RecoverKeyFromCompact(recovered, messageHash, signature, recoveryId, true), Is.False);
+    }
+
+    [Test]
+    public void Can_decompress()
+    {
+        byte[] privateKey = new byte[32];
+        privateKey[0] = 1;
+        byte[] compressed = SecP256k1.GetPublicKey(privateKey, true)!;
+        byte[] uncompressed = SecP256k1.GetPublicKey(privateKey, false)!;
+        Assert.That(SecP256k1.Decompress(compressed), Is.EqualTo(uncompressed));
+    }
+
+    [TestCase("000000000000000000000000000000000000000000000000000000000000000000")]
+    [TestCase("020000000000000000000000000000000000000000000000000000000000000000")]
+    [TestCase("02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")]
+    public void Decompress_throws_for_invalid_key(string compressedHex)
+    {
+        byte[] compressed = Convert.FromHexString(compressedHex);
+        Assert.That(() => SecP256k1.Decompress(compressed), Throws.TypeOf<CryptographicException>());
     }
 }
