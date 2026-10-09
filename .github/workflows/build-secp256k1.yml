@@ -97,7 +97,7 @@ jobs:
       - name: Build
         run: |
           if (Test-Path build) { rd -Recurse build }
-          cmake -S . -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch }} `
+          cmake -S . -B build -A ${{ matrix.arch }} `
             -DSECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build --config Release
           ls build/bin/Release/*.dll | rni -NewName secp256k1.dll
