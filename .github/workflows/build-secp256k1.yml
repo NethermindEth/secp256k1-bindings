@@ -69,6 +69,7 @@ jobs:
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch == 'arm64' && 'arm64' || 'x86_64' }} \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
             -DSECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build
 
