@@ -10,7 +10,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <PackageId>Nethermind.Crypto.SecP256k1</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://nethermind.io</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/nethermindeth/secp256k1-bindings</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>cryptography elliptic-curve secp256k1</PackageTags>
     <RepositoryType>git</RepositoryType>
