@@ -34,13 +34,26 @@ jobs:
           repository: bitcoin-core/secp256k1
           ref: ${{ inputs.ref }}
 
+      # -Bsymbolic binds the library's references to its own exported symbols at link time, so another libsecp256k1 in
+      # the global symbol scope cannot replace them.
       - name: Build
         run: |
           rm -rf build
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-Bsymbolic \
             -DSECP256K1_ENABLE_MODULE_RECOVERY=ON
           cmake --build build
+
+      - name: Verify symbol binding
+        run: |
+          so=build/lib/libsecp256k1.so
+          nm -D --defined-only $so | awk '{ sub(/@.*/, "", $NF); print $NF }' | sort -u > $RUNNER_TEMP/defined
+          objdump -R $so | awk '$1 ~ /^[0-9a-f]+$/ { sub(/[@+].*/, "", $3); print $3 }' | sort -u > $RUNNER_TEMP/relocated
+          if comm -12 $RUNNER_TEMP/defined $RUNNER_TEMP/relocated | grep .; then
+            echo "::error::Symbols above are bound at run time and can be replaced by another libsecp256k1"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7

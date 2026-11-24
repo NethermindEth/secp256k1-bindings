@@ -20,6 +20,7 @@ The package version is `<libsecp256k1 version>.<run number>`. `VersionPrefix` in
 - Add tests for new code and bug fixes.
 - Use conventional commits; keep scoped and imperative.
 - Do not edit the prebuilt binaries under `src/Nethermind.Crypto.SecP256k1/runtimes` (Git LFS); update them by running [build-secp256k1.yml](./.github/workflows/build-secp256k1.yml).
+- Link the Linux library with `-Wl,-Bsymbolic` so another libsecp256k1 in the process cannot replace its own functions; [build-secp256k1.yml](./.github/workflows/build-secp256k1.yml) fails if any remain bound at run time.
 - Prefer the latest versions of GitHub Actions and runners.
 - Update [THIRD-PARTY-NOTICES](./THIRD-PARTY-NOTICES) when introducing a dependency if needed.
 - Keep [AGENTS.md](./AGENTS.md) in sync with the ongoing development.
