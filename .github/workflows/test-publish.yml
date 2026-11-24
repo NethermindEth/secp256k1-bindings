@@ -19,6 +19,7 @@ jobs:
   test:
     name: Test
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
@@ -40,6 +41,18 @@ jobs:
       - name: Test
         working-directory: src/Nethermind.Crypto.SecP256k1.Tests
         run: dotnet test -c release
+
+      # Hosts such as besu load another libsecp256k1 into the global symbol scope
+      - name: Test with the distro libsecp256k1 loaded globally
+        if: runner.os == 'Linux'
+        working-directory: src/Nethermind.Crypto.SecP256k1.Tests
+        run: |
+          sudo apt-get update -q
+          pkg=$(apt-cache depends libsecp256k1-dev | awk '$1 == "Depends:" && $2 ~ /^libsecp256k1-[0-9]+$/ { print $2; exit }')
+          sudo apt-get install -y --no-install-recommends $pkg
+          lib=$(ldconfig -p | awk '$1 ~ /^libsecp256k1\.so\.[0-9]+$/ { print $NF; exit }')
+          test -n "$lib"
+          LD_PRELOAD="$lib" dotnet test -c release --no-build
 
   publish:
     name: Publish
