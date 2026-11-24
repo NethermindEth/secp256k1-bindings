@@ -34,8 +34,8 @@ jobs:
           repository: bitcoin-core/secp256k1
           ref: ${{ inputs.ref }}
 
-      # -Bsymbolic binds the library's calls to its own exported functions at link time. Without it, another
-      # libsecp256k1 in the global symbol scope replaces them, and context creation aborts with "illegal argument".
+      # -Bsymbolic binds the library's references to its own exported symbols at link time, so another libsecp256k1 in
+      # the global symbol scope cannot replace them.
       - name: Build
         run: |
           rm -rf build

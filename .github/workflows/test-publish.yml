@@ -42,7 +42,7 @@ jobs:
         working-directory: src/Nethermind.Crypto.SecP256k1.Tests
         run: dotnet test -c release
 
-      # The host process may already have another libsecp256k1 in the global symbol scope
+      # Verifies that another libsecp256k1 in the global symbol scope cannot replace the library's own symbols
       - name: Test with the distro libsecp256k1 loaded globally
         if: runner.os == 'Linux'
         working-directory: src/Nethermind.Crypto.SecP256k1.Tests
